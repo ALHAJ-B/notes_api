@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LockBox.io | Secure Notes</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>LockBox<span>.io</span></h1>
+            <p>End-to-end encrypted notes.</p>
+        </header>
+
+        <section id="auth-section" class="card">
+            <div class="tabs">
+                <button type="button" class="tab-btn" id="login-tab" >Login</button>
+                <button type="button" class="tab-btn" id="register-tab">Register</button>
+            </div>
+            
+            <form id="auth-form">
+                <input type="hidden" name="action" id="auth-action" value="login">
+                
+                <input type="email" name="username" id="username" placeholder="Email Address" required>
+                <input type="password" name="password" id="password" placeholder="Master Password" required>
+                
+                <button type="submit" class="btn-primary" id="auth-submit-btn">Login to Vault</button>
+            </form>
+        </section>
+
+        <section id="notes-section" class="card hidden">
+            <div class="dashboard-header">
+                <h2>Your Vault</h2>
+                <button type="button" id="logout-btn" class="btn-outline">Logout</button>
+            </div>
+
+            <form id="note-form">
+                <textarea id="note-input" name="content" placeholder="Write a secret note... (will be encrypted)" rows="3" required></textarea>
+                <button type="submit" class="btn-primary">Encrypt & Save</button>
+            </form>
+
+            <hr>
+
+            <div id="notes-list">
+                </div>
+        </section>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
