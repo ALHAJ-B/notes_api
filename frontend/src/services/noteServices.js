@@ -1,4 +1,4 @@
-import { postNoteToApi, fetchNotesFromApi } from "../api/notesApi.js";
+import { postNoteToApi, fetchNotesFromApi, updateNoteInApi, deleteNoteFromApi } from "../api/notesApi.js";
 import SecureVault from "../crypto/SecureVault.js";
 
 export const encryptAndSaveNote = async (plainText, encryptionKey, token)=>{
@@ -19,3 +19,12 @@ export const fetchAndDecryptNotes = async (encryptionKey, token)=>{
     )
 
 }
+
+export const encryptAndUpdateNote = async (id, plainText, encryptionKey, token) => {
+    const encryptedPayload = await SecureVault.encryptNote(plainText, encryptionKey);
+    return updateNoteInApi(id, encryptedPayload, token);
+};
+
+export const deleteNoteService = async (id, token) => {
+    return deleteNoteFromApi(id, token);
+};

@@ -22,7 +22,7 @@ export function createApp() {
     etag: false,
     extensions: ['html', 'htm'],
     index: 'index.html',
-    maxAge: '1d',
+    maxAge: 0,
     redirect: false,
     setHeaders(res) {
       res.set('x-timestamp', Date.now());

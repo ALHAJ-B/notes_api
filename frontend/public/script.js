@@ -1,5 +1,5 @@
 import { handleSubmit } from '/src/api/authApi.js';
-import { encryptAndSaveNote, fetchAndDecryptNotes } from '/src/services/noteServices.js';
+import { encryptAndSaveNote, fetchAndDecryptNotes, encryptAndUpdateNote, deleteNoteService } from '/src/services/noteServices.js';
 
 // --- State Management (Memory Only) ---
 let state = {
@@ -21,25 +21,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logout-btn');
 
     
-    registerTab.addEventListener("click", ()=>{
-        authSubmitBtn.textContent = "Create Secure Account";
-    })
-
-    loginTab.addEventListener("click", ()=>{
-        authSubmitBtn.textContent("Login to Vault");
-    })
-    
     // --- Tab Switching Logic ---
     const setAuthMode = (mode) => {
         authAction.value = mode; // Set hidden input for handleSubmit
-        authSubmitBtn.textContent = mode === 'login' ? 'Login to Vault' : 'Create Secure Account';
+        authSubmitBtn.textContent = mode === 'login' ? 'Login' : 'Register';
         
-        loginTab.classList.toggle('active', mode === 'login');
-        registerTab.classList.toggle('active', mode === 'register');
+        const authTitle = document.querySelector('.auth-header h2');
+        if (authTitle) {
+            authTitle.textContent = mode === 'login' ? 'Access Vault' : 'Create Vault';
+        }
+        
+        if (mode === 'login') {
+            loginTab.classList.add('active');
+            registerTab.classList.remove('active');
+        } else {
+            loginTab.classList.remove('active');
+            registerTab.classList.add('active');
+        }
     };
 
     loginTab.addEventListener('click', () => setAuthMode('login'));
     registerTab.addEventListener('click', () => setAuthMode('register'));
+    
+    // Set default mode on load
+    setAuthMode('login');
 
     // --- Helper: UI Transitions ---
     const toggleUI = (isLoggedIn) => {
@@ -88,6 +93,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- Helper: HTML Escaper to prevent XSS ---
+    const escapeHTML = (str) => {
+        if (!str) return '';
+        return str.replace(/[&<>'"]/g, tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[tag]));
+    };
+
     // --- 3. Note Retrieval (Fetch & Decrypt) ---
     const loadNotes = async () => {
         try {
@@ -95,10 +112,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const decryptedNotes = await fetchAndDecryptNotes(state.encryptionKey, state.token);
             
             notesList.innerHTML = decryptedNotes.map(note => `
-                <div class="note-item">
+                <div class="note-item" data-id="${note.id}">
                     <div class="note-content">
-                        <p>${note.content}</p>
-                        <small>IV: ${note.iv.substring(0, 10)}...</small>
+                        <p class="note-text">${escapeHTML(note.content)}</p>
+                        <small>IV: ${escapeHTML(note.iv).substring(0, 10)}...</small>
+                    </div>
+                    <div class="note-actions">
+                        <button class="edit-btn btn-outline">Edit</button>
+                        <button class="delete-btn btn-outline">Delete</button>
                     </div>
                 </div>
             `).join('') || '<p>No notes found.</p>';
@@ -106,6 +127,42 @@ document.addEventListener('DOMContentLoaded', () => {
             notesList.innerHTML = '<p class="error">Decryption failed.</p>';
         }
     };
+
+    // --- Handle Edit & Delete Clicks ---
+    notesList.addEventListener('click', async (e) => {
+        const noteItem = e.target.closest('.note-item');
+        if (!noteItem) return;
+        
+        const noteId = noteItem.getAttribute('data-id');
+
+        // Delete Logic
+        if (e.target.classList.contains('delete-btn')) {
+            if (confirm("Are you sure you want to delete this encrypted note?")) {
+                try {
+                    await deleteNoteService(noteId, state.token);
+                    loadNotes(); // Refresh list
+                } catch (err) {
+                    alert("Failed to delete note.");
+                }
+            }
+        }
+
+        // Edit Logic
+        if (e.target.classList.contains('edit-btn')) {
+            const currentText = noteItem.querySelector('.note-text').innerText;
+            const newContent = prompt("Edit your note:", currentText);
+            
+            if (newContent && newContent !== currentText) {
+                try {
+                    // Encrypts the newly edited text before sending it over the network
+                    await encryptAndUpdateNote(noteId, newContent, state.encryptionKey, state.token);
+                    loadNotes(); // Refresh list
+                } catch (err) {
+                    alert("Failed to edit note.");
+                }
+            }
+        }
+    });
 
     // --- 4. Logout (Wipe Memory) ---
     logoutBtn.addEventListener('click', () => {

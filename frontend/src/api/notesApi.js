@@ -24,6 +24,7 @@ export const fetchNotesFromApi = async (token) => {
     headers: {
       Authorization: `Bearer ${token}`,
     },
+    cache: "no-store",
   });
 
   const data = await res.json().catch(() => ({}));
@@ -32,4 +33,28 @@ export const fetchNotesFromApi = async (token) => {
   }
 
   return data.notes || [];
+};
+
+export const updateNoteInApi = async (id, payload, token) => {
+  const res = await fetch(`${API}/notes/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Failed to update note");
+  return data;
+};
+
+export const deleteNoteFromApi = async (id, token) => {
+  const res = await fetch(`${API}/notes/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Failed to delete note");
+  return data;
 };

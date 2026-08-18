@@ -3,50 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LockBox.io | Secure Notes</title>
-    <link rel="stylesheet" href="style.css">
+    <title>LockBox | Secure Notes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>LockBox<span>.io</span></h1>
-            <p>End-to-end encrypted notes.</p>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="logo">LockBox</div>
         </header>
 
-        <section id="auth-section" class="card">
-            <div class="tabs">
-                <button type="button" class="tab-btn" id="login-tab" >Login</button>
-                <button type="button" class="tab-btn" id="register-tab">Register</button>
-            </div>
-            
-            <form id="auth-form">
-                <input type="hidden" name="action" id="auth-action" value="login">
-                
-                <input type="email" name="username" id="username" placeholder="Email Address" required>
-                <input type="password" name="password" id="password" placeholder="Master Password" required>
-                
-                <button type="submit" class="btn-primary" id="auth-submit-btn">Login to Vault</button>
-            </form>
-        </section>
+        <main class="main-content">
+            <!-- Auth Section -->
+            <section id="auth-section" class="view-section">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <h2>Access Vault</h2>
+                        <p>End-to-end encrypted notes.</p>
+                    </div>
 
-        <section id="notes-section" class="card hidden">
-            <div class="dashboard-header">
-                <h2>Your Vault</h2>
-                <button type="button" id="logout-btn" class="btn-outline">Logout</button>
-            </div>
-
-            <form id="note-form">
-                <textarea id="note-input" name="content" placeholder="Write a secret note... (will be encrypted)" rows="3" required></textarea>
-                <button type="submit" class="btn-primary">Encrypt & Save</button>
-            </form>
-
-            <hr>
-
-            <div id="notes-list">
+                    <div class="tabs">
+                        <button type="button" class="tab-btn " id="login-tab">Login</button>
+                        <button type="button" class="tab-btn active" id="register-tab">Register</button>
+                    </div>
+                    
+                    <form id="auth-form" class="auth-form">
+                        <input type="hidden" name="action" id="auth-action" value="login">
+                        
+                        <div class="input-group">
+                            <label for="username">Email</label>
+                            <input type="email" name="username" id="username" placeholder="name@example.com" required>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="password">Master Password</label>
+                            <input type="password" name="password" id="password" placeholder="••••••••" required>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary" id="auth-submit-btn">Login to Vault</button>
+                    </form>
                 </div>
-        </section>
+            </section>
+
+            <!-- Notes Section -->
+            <section id="notes-section" class="view-section hidden">
+                <div class="vault-header">
+                    <h2>Your Notes</h2>
+                    <button type="button" id="logout-btn" class="btn-text">Logout</button>
+                </div>
+
+                <form id="note-form" class="note-form">
+                    <textarea id="note-input" name="content" placeholder="Write something secret..." rows="3" required></textarea>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Save Note</button>
+                    </div>
+                </form>
+
+                <div id="notes-list" class="notes-grid">
+                    <!-- Notes injected here -->
+                </div>
+            </section>
+        </main>
     </div>
 
-    <script type="module" src="script.js"></script>
+    <script type="module" src="script.js?v=2"></script>
 </body>
 </html>
