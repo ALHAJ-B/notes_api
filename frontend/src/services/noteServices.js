@@ -11,12 +11,17 @@ export const fetchAndDecryptNotes = async (encryptionKey, token)=>{
 
     const encryptedNotes = await fetchNotesFromApi(token);
     
-    return Promise.all(
+    const results = await Promise.allSettled(
         encryptedNotes.map(async (note)=>{
             const decryptedContent = await SecureVault.decryptNote(note, encryptionKey);
             return { ...note, content: decryptedContent };
         })
-    )
+    );
+
+    return results.map((result, i) => {
+        if (result.status === 'fulfilled') return result.value;
+        return { id: encryptedNotes[i].id, iv: encryptedNotes[i].iv, content: null, error: 'Decryption failed' };
+    });
 
 }
 

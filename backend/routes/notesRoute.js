@@ -25,8 +25,8 @@ router.post('/', notesWriteRateLimiter, validateBody(notePayloadSchema), async (
 
     try {
         const insertNote = db.prepare(`INSERT INTO notes (userId, content, iv) VALUES (?, ?, ?)`);
-        insertNote.run(userId, content, iv);
-        res.status(201).json({ message: "Note added!" });
+        const result = insertNote.run(userId, content, iv);
+        res.status(201).json({ message: "Note added!", id: Number(result.lastInsertRowid) });
     } catch (err) {
         next(createHttpError(500, 'Failed to add note'));
     }

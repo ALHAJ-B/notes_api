@@ -1,30 +1,10 @@
-// import { DatabaseSync } from 'node:sqlite'
-// const db = new DatabaseSync(':memory:')
-
-// // Execute SQL statements from strings
-// db.exec(`
-//     CREATE TABLE users (
-//         id INTEGER PRIMARY KEY AUTOINCREMENT,
-//         username TEXT UNIQUE,
-//         password TEXT
-//     )
-// `)
-
-// db.exec(`
-//     CREATE TABLE todos (
-//         id INTEGER PRIMARY KEY AUTOINCREMENT,
-//         user_id INTEGER,
-//         task TEXT,
-//         completed BOOLEAN DEFAULT 0,
-//         FOREIGN KEY(user_id) REFERENCES users(id)
-//     )    
-// `)
-
-// export default db
-
-
 import Database from 'better-sqlite3';
-const db = new Database('database.db');
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+
+const dbPath = process.env.DB_PATH || path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'database.db');
+const db = new Database(dbPath);
+db.pragma('foreign_keys = ON');
 
 // This "Schema" creates the tables if they don't exist
 const createTables = `

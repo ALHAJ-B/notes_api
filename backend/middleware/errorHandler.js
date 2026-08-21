@@ -15,7 +15,7 @@ export function errorHandler(err, req, res, next) {
   const statusCode = Number(err.statusCode) || 500;
   const requestId = req.requestId || 'unknown';
   const response = {
-    error: err.message || 'Internal server error',
+    error: statusCode >= 500 ? 'Internal Server Error' : (err.message || 'Internal server error'),
     requestId,
   };
 

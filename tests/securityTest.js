@@ -27,7 +27,7 @@ test('Authentication: SQL Injection attempt on login', async () => {
   const username = "admin' OR 1=1 --";
   const password = "password_doesnt_matter";
   
-  const loginRes = await fetch(`${baseUrl}/auth/login`, {
+  const loginRes = await fetch(`${baseUrl}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
@@ -40,7 +40,7 @@ test('Authentication: SQL Injection attempt on login', async () => {
 });
 
 test('XSS Validation: Notes payload size and base64 structure', async () => {
-  const loginRes = await fetch(`${baseUrl}/auth/login`, {
+  const loginRes = await fetch(`${baseUrl}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: "validUser123", password: "validPassword1" }),
@@ -48,7 +48,7 @@ test('XSS Validation: Notes payload size and base64 structure', async () => {
   // Note: we just need to ensure the system rejects non-base64 
   
   // Submitting <script> tags straight won't work because it demands base64
-  const createNoteRes = await fetch(`${baseUrl}/notes`, {
+  const createNoteRes = await fetch(`${baseUrl}/api/notes`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -62,5 +62,6 @@ test('XSS Validation: Notes payload size and base64 structure', async () => {
   
   // It shouldn't even reach the auth middleware because the format doesn't matter or auth blocks it first.
   // Actually auth blocks it first, let's test without auth blocks by logging in.
+  assert.equal(createNoteRes.status, 401);
 });
 

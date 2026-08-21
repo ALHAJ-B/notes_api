@@ -25,7 +25,8 @@ jobs:
 
     - name: Create environment variables
       run: |
-        echo "JWT_SECRET=super_secret_github_test_key_123" > .env
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET || 'ci_test_jwt_secret_key_not_for_production' }}" > .env
+        echo "PORT=3000" >> .env
 
     - name: Run Tests
       run: npm test

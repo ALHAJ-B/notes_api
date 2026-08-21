@@ -1,4 +1,5 @@
 import express from 'express';
+import os from 'node:os';
 import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -36,8 +37,17 @@ export function createApp() {
   app.use(express.static(path.join(projectRoot, 'frontend/public'), options));
   app.use('/src', express.static(path.join(projectRoot, 'frontend/src')));
 
-  app.use('/auth', authRateLimiter, authRoutes);
-  app.use('/notes', authMiddleware, noteRoute);
+  app.use('/api/auth', authRateLimiter, authRoutes);
+  app.use('/api/notes', authMiddleware, noteRoute);
+
+  app.get('/api/health', (req, res) => {
+    res.json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      hostname: os.hostname(),
+      uptime: Math.floor(process.uptime())
+    });
+  });
 
   app.use(notFoundHandler);
   app.use(errorHandler);

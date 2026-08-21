@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration - Change the port if your backend uses a different one
-API_URL="http://localhost:3000/auth/register"
+API_URL="http://localhost:3000/api/auth/register"
 
 # Array of usernames to register
 USERS=("dev" "johndoe" "janedoe" "admin" "tester")

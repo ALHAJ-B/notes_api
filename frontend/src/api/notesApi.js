@@ -1,4 +1,4 @@
-const API = "";
+const API = "/api";
 
 export const postNoteToApi = async (payload, token) => {
   const res = await fetch(`${API}/notes`, {

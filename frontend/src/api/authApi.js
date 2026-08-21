@@ -1,4 +1,4 @@
-const API = "";
+const API = "/api";
 
 export const arrayBufferToBase64 = (buffer) =>
   btoa(String.fromCharCode(...new Uint8Array(buffer)));

@@ -111,7 +111,18 @@ document.addEventListener('DOMContentLoaded', () => {
             // Service decrypts ciphertext locally using RAM key [cite: 953, 969]
             const decryptedNotes = await fetchAndDecryptNotes(state.encryptionKey, state.token);
             
-            notesList.innerHTML = decryptedNotes.map(note => `
+            notesList.innerHTML = decryptedNotes.map(note => {
+                if (note.error) {
+                    return `<div class="note-item note-error" data-id="${note.id}">
+                        <div class="note-content">
+                            <p class="note-text">⚠️ This note could not be decrypted.</p>
+                        </div>
+                        <div class="note-actions">
+                            <button class="delete-btn btn-outline">Delete</button>
+                        </div>
+                    </div>`;
+                }
+                return `
                 <div class="note-item" data-id="${note.id}">
                     <div class="note-content">
                         <p class="note-text">${escapeHTML(note.content)}</p>
@@ -122,7 +133,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button class="delete-btn btn-outline">Delete</button>
                     </div>
                 </div>
-            `).join('') || '<p>No notes found.</p>';
+                `;
+            }).join('') || '<p>No notes found.</p>';
         } catch (err) {
             notesList.innerHTML = '<p class="error">Decryption failed.</p>';
         }

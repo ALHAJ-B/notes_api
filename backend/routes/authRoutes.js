@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post('/register', validateBody(registerSchema), async (req, res, next) => {
     const { username, password, encryptionSalt } = req.validatedBody;
-    const hashedPassword = await bcrypt.hash(password, 8);
+    const hashedPassword = await bcrypt.hash(password, 12);
     const SECRET = process.env.JWT_SECRET;
 
     if (!SECRET) {
@@ -47,6 +47,7 @@ router.post('/login', validateBody(loginSchema), async (req,res, next)=>{
         const getUser = db.prepare(`SELECT * FROM users WHERE username = ? `);
         const user = getUser.get(username);
         if (!user){
+            await bcrypt.compare(password, '$2b$12$invalidhashpaddingtomakeitsixtycharacterslong.');
             return res.status(401).json({ message: 'Invalid credentials' })
         }
 

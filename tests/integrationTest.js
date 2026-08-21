@@ -28,7 +28,7 @@ test('auth + notes integration flow works', async () => {
   const password = 'pass12345';
   const encryptionSalt = 'c29tZV9zYWx0X2Jhc2U2NA==';
 
-  const registerRes = await fetch(`${baseUrl}/auth/register`, {
+  const registerRes = await fetch(`${baseUrl}/api/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password, encryptionSalt }),
@@ -37,14 +37,14 @@ test('auth + notes integration flow works', async () => {
   const registerBody = await registerRes.json();
   assert.equal(typeof registerBody.token, 'string');
 
-  const duplicateRes = await fetch(`${baseUrl}/auth/register`, {
+  const duplicateRes = await fetch(`${baseUrl}/api/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password, encryptionSalt }),
   });
   assert.equal(duplicateRes.status, 409);
 
-  const loginRes = await fetch(`${baseUrl}/auth/login`, {
+  const loginRes = await fetch(`${baseUrl}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
@@ -54,7 +54,7 @@ test('auth + notes integration flow works', async () => {
   assert.equal(typeof loginBody.token, 'string');
   assert.equal(loginBody.encryptionSalt, encryptionSalt);
 
-  const badLoginRes = await fetch(`${baseUrl}/auth/login`, {
+  const badLoginRes = await fetch(`${baseUrl}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password: 'wrong_password' }),
@@ -64,7 +64,7 @@ test('auth + notes integration flow works', async () => {
   const badLoginBody = await badLoginRes.json();
   assert.equal(badLoginBody.message, 'Invalid credentials');
 
-  const unknownUserRes = await fetch(`${baseUrl}/auth/login`, {
+  const unknownUserRes = await fetch(`${baseUrl}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: `${username}_missing`, password }),
@@ -73,7 +73,7 @@ test('auth + notes integration flow works', async () => {
   const unknownUserBody = await unknownUserRes.json();
   assert.equal(unknownUserBody.message, 'Invalid credentials');
 
-  const badRegisterRes = await fetch(`${baseUrl}/auth/register`, {
+  const badRegisterRes = await fetch(`${baseUrl}/api/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: 'a', password: '123', encryptionSalt: 'not-base64' }),
@@ -83,10 +83,10 @@ test('auth + notes integration flow works', async () => {
   assert.equal(badRegisterBody.error, 'Invalid request body');
   assert.ok(Array.isArray(badRegisterBody.details));
 
-  const unauthNotesRes = await fetch(`${baseUrl}/notes`);
+  const unauthNotesRes = await fetch(`${baseUrl}/api/notes`);
   assert.equal(unauthNotesRes.status, 401);
 
-  const createNoteRes = await fetch(`${baseUrl}/notes`, {
+  const createNoteRes = await fetch(`${baseUrl}/api/notes`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -99,7 +99,7 @@ test('auth + notes integration flow works', async () => {
   });
   assert.equal(createNoteRes.status, 201);
 
-  const badNoteRes = await fetch(`${baseUrl}/notes`, {
+  const badNoteRes = await fetch(`${baseUrl}/api/notes`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ test('auth + notes integration flow works', async () => {
   const badNoteBody = await badNoteRes.json();
   assert.equal(badNoteBody.error, 'Invalid request body');
 
-  const getNotesRes = await fetch(`${baseUrl}/notes`, {
+  const getNotesRes = await fetch(`${baseUrl}/api/notes`, {
     headers: { Authorization: `Bearer ${loginBody.token}` },
   });
   assert.equal(getNotesRes.status, 200);
@@ -130,7 +130,7 @@ test('users cannot edit or delete notes owned by other users', async () => {
   const encryptionSalt = 'Y3Jvc3NfdXNlcl9zYWx0X3Rlc3Q=';
 
   const register = async (username) => {
-    const res = await fetch(`${baseUrl}/auth/register`, {
+    const res = await fetch(`${baseUrl}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password, encryptionSalt }),
@@ -139,7 +139,7 @@ test('users cannot edit or delete notes owned by other users', async () => {
   };
 
   const login = async (username) => {
-    const res = await fetch(`${baseUrl}/auth/login`, {
+    const res = await fetch(`${baseUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
@@ -154,7 +154,7 @@ test('users cannot edit or delete notes owned by other users', async () => {
   const loginA = await login(userA);
   const loginB = await login(userB);
 
-  const ownerCreateRes = await fetch(`${baseUrl}/notes`, {
+  const ownerCreateRes = await fetch(`${baseUrl}/api/notes`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -167,7 +167,7 @@ test('users cannot edit or delete notes owned by other users', async () => {
   });
   assert.equal(ownerCreateRes.status, 201);
 
-  const ownerNotesRes = await fetch(`${baseUrl}/notes`, {
+  const ownerNotesRes = await fetch(`${baseUrl}/api/notes`, {
     headers: { Authorization: `Bearer ${loginA.token}` },
   });
   assert.equal(ownerNotesRes.status, 200);
@@ -175,14 +175,14 @@ test('users cannot edit or delete notes owned by other users', async () => {
   const ownerNoteId = ownerNotesBody.notes[0].id;
   assert.ok(ownerNoteId > 0);
 
-  const attackerReadRes = await fetch(`${baseUrl}/notes`, {
+  const attackerReadRes = await fetch(`${baseUrl}/api/notes`, {
     headers: { Authorization: `Bearer ${loginB.token}` },
   });
   assert.equal(attackerReadRes.status, 200);
   const attackerReadBody = await attackerReadRes.json();
   assert.ok(attackerReadBody.notes.every((n) => n.id !== ownerNoteId));
 
-  const attackerUpdateRes = await fetch(`${baseUrl}/notes/${ownerNoteId}`, {
+  const attackerUpdateRes = await fetch(`${baseUrl}/api/notes/${ownerNoteId}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ test('users cannot edit or delete notes owned by other users', async () => {
   });
   assert.equal(attackerUpdateRes.status, 404);
 
-  const attackerDeleteRes = await fetch(`${baseUrl}/notes/${ownerNoteId}`, {
+  const attackerDeleteRes = await fetch(`${baseUrl}/api/notes/${ownerNoteId}`, {
     method: 'DELETE',
     headers: {
       Authorization: `Bearer ${loginB.token}`,
@@ -203,7 +203,7 @@ test('users cannot edit or delete notes owned by other users', async () => {
   });
   assert.equal(attackerDeleteRes.status, 404);
 
-  const ownerVerifyRes = await fetch(`${baseUrl}/notes`, {
+  const ownerVerifyRes = await fetch(`${baseUrl}/api/notes`, {
     headers: { Authorization: `Bearer ${loginA.token}` },
   });
   assert.equal(ownerVerifyRes.status, 200);
